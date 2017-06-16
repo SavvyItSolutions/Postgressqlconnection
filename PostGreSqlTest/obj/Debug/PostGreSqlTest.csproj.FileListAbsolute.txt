@@ -1,0 +1,10 @@
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\PostGreSqlTest.exe.config
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\PostGreSqlTest.exe
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\PostGreSqlTest.pdb
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\Npgsql.dll
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\System.Threading.Tasks.Extensions.dll
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\Npgsql.xml
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\bin\Debug\System.Threading.Tasks.Extensions.xml
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\obj\Debug\PostGreSqlTest.csprojResolveAssemblyReference.cache
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\obj\Debug\PostGreSqlTest.exe
+c:\users\soumik\documents\visual studio 2017\Projects\PostGreSqlTest\PostGreSqlTest\obj\Debug\PostGreSqlTest.pdb
