@@ -23,6 +23,10 @@ namespace PostGreSqlTest
                 DateTime start = DateTime.Now;
                 List<string> lstInsert = new List<string>();
                 List<int> lstUpdate = new List<int>();
+                Dictionary<string, string> EmailDict = new Dictionary<string, string>();
+                Dictionary<string, string> SMSDict = new Dictionary<string, string>();
+                string userid = ConfigurationManager.AppSettings["SMSLogin"];
+                string password = ConfigurationManager.AppSettings["SMSPassword"];
                 string msg = string.Format("Time: {0}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
                 logger.Info(msg);
                 logger.Info("-------------------------------------------------------");
@@ -74,9 +78,10 @@ namespace PostGreSqlTest
                         string city = dr["city"].ToString();
                         string state = dr["state"].ToString();
                         string CustomerType = dr["custtype"].ToString();
-                        DateTime CustomerAdded = Convert.ToDateTime(dr["custadded"]);
+                        DateTime CustomerAdded = DateTime.Parse(dr["custadded"].ToString());
                         string CardNumber = dr["clubcard1"].ToString();
                         lastRow = Convert.ToDateTime(dr["last_modified"]);
+                        string zip = dr["zip_code"].ToString();
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
                         comand.CommandType = CommandType.StoredProcedure;
@@ -93,44 +98,70 @@ namespace PostGreSqlTest
                         comand.Parameters.AddWithValue("@CustomerType", CustomerType);
                         comand.Parameters.AddWithValue("@CustomerAdded", CustomerAdded);
                         comand.Parameters.AddWithValue("@CardNumber", CardNumber);
+                        comand.Parameters.AddWithValue("@Zip",zip);
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
                         if (Result == 1)
+                        {
+                            logger.Info("CustomerId inserted = " + CustId);
                             lstInsert.Add(email);
+                            string trimmedFirstName = "";
+                            if (firstname.Length > 13)
+                            {
+                                trimmedFirstName = firstname.Substring(0, 13);
+                                EmailDict.Add(email, trimmedFirstName);
+                                SMSDict.Add(Phone1, trimmedFirstName);
+                            }
+                            else
+                            {
+                                EmailDict.Add(email, firstname);
+                                SMSDict.Add(Phone1, firstname);
+                            }
+                        }
                         else
+                        {
+                            logger.Info("CustomerId updated = "+CustId);
                             lstUpdate.Add(CustId);
+                        }
                     }
 
                     logger.Info("Data inserted successfully.");
                     string updateQuery = "Update CustomerTrack set LastModifiedDate='" + lastRow + "'";
                     logger.Info(updateQuery);
+                    updateQuery += "where storeid = " + StoreId;
                     comand = new SqlCommand(updateQuery, con);
                     con.Open();
                     logger.Info("Updating lastmodified in hangouts db");
                     comand.ExecuteNonQuery();
                     logger.Info("Updated successfully");
                     con.Close();
-                    for (int i = 0; i < lstInsert.Count; i++)
+                    if (lstInsert.Count > 0)
                     {
-                        SendEmail se = new SendEmail();
-                        var result = se.SendOneEmail(lstInsert[i]);
+                        foreach(KeyValuePair<string,string> smsItems in SMSDict)
+                        {
+                            logger.Info("Sending sms");
+                            SendSMS sms = new SendSMS();
+                            string message = "Hi " + smsItems.Value + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/c7Zpbp Android App https://goo.gl/4NFV3t";  // "Hi "+smsItems.Value +" We are glad to have you onboard with wine hangouts!";
+                           // sms.SendAlertSMS(userid, password, "8162775179", message);
+                           // sms.SendAlertSMS(userid, password, "9966664262", message);
+                           // sms.SendAlertSMS(userid, password, "8978805050", message);
+                            logger.Info("SMS successfully sent!");
+                        }
+                        foreach (KeyValuePair<string, string> item in EmailDict)
+                        {
+                            SendEmail se = new SendEmail();
+                            se.SendOneEmail(item.Key, item.Value).Wait();
+                            logger.Info("Mail Sent");
+                        }                        
                     }
 
                 }
+                //var result = se.SendOneEmail("soumik.12paul@gmail.com");
                 DateTime end = DateTime.Now;
-                TimeSpan duration = start - end;
+                TimeSpan duration = end - start;
                 logger.Info("Time taken to execute = "+duration);
-                // Execute a query
-                //NpgsqlDataReader dr = cmd.ExecuteReader();
-
-                // Read all rows and output the first column in each row
-                //while (dr.Read())
-                //    Console.Write("{0}\n", dr[0]);
-
-                // Close connection
-
-                 //Console.ReadLine();
+                
             }
             catch (Exception ex)
             {
