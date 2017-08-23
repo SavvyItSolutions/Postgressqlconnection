@@ -27,7 +27,8 @@ namespace PostGreSqlTest
                 Dictionary<string, string> SMSDict = new Dictionary<string, string>();
                 string userid = ConfigurationManager.AppSettings["SMSLogin"];
                 string password = ConfigurationManager.AppSettings["SMSPassword"];
-                string msg = string.Format("Time: {0}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
+                string msg = Environment.NewLine;
+                msg += string.Format("Time: {0}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt"));
                 logger.Info(msg);
                 logger.Info("-------------------------------------------------------");
                 int StoreId = Convert.ToInt32(ConfigurationManager.AppSettings["StoreId"]);
@@ -78,10 +79,14 @@ namespace PostGreSqlTest
                         string city = dr["city"].ToString();
                         string state = dr["state"].ToString();
                         string CustomerType = dr["custtype"].ToString();
-                        DateTime CustomerAdded = DateTime.Parse(dr["custadded"].ToString());
+                        DateTime CustomerAdded = DateTime.Now;
+                        if (dr["custadded"] != DBNull.Value)
+                            CustomerAdded = Convert.ToDateTime(dr["custadded"],System.Globalization.CultureInfo.GetCultureInfo("hi-IN").DateTimeFormat);                            
                         string CardNumber = dr["clubcard1"].ToString();
                         lastRow = Convert.ToDateTime(dr["last_modified"]);
                         string zip = dr["zip_code"].ToString();
+                        if (zip.Length >= 5)
+                            zip = zip.Substring(0, 5);
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
                         comand.CommandType = CommandType.StoredProcedure;
@@ -110,13 +115,17 @@ namespace PostGreSqlTest
                             if (firstname.Length > 13)
                             {
                                 trimmedFirstName = firstname.Substring(0, 13);
-                                EmailDict.Add(email, trimmedFirstName);
-                                SMSDict.Add(Phone1, trimmedFirstName);
+                                if(email != null || email != "")
+                                    EmailDict.Add(email, trimmedFirstName);
+                                if(Phone1 != null || Phone1 != "")
+                                    SMSDict.Add(Phone1, trimmedFirstName);
                             }
                             else
                             {
-                                EmailDict.Add(email, firstname);
-                                SMSDict.Add(Phone1, firstname);
+                                if (email != null || email != "")
+                                    EmailDict.Add(email, firstname);
+                                if (Phone1 != null || Phone1 != "")
+                                    SMSDict.Add(Phone1, firstname);
                             }
                         }
                         else

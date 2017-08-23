@@ -26,6 +26,7 @@ namespace PostGreSqlTest
             //myMessage.AddTo(new EmailAddress("soumpunk@gmail.com", "Test User"));
             myMessage.AddTo(new EmailAddress("mohana.indukuri@gmail.com", "Mohana"));
             myMessage.AddTo(new EmailAddress("soumpunk@gmail.com", "Soumik"));
+            //myMessage.AddTo(new EmailAddress("justin@wineoutlet.com", "Justin"));
             //myMessage.AddTo(new EmailAddress("dubeyankur@gmail.com", "Ankur"));
             var apiKey = ConfigurationManager.AppSettings["SENDGRID_APIKEY"];
             var client = new SendGridClient(apiKey);
