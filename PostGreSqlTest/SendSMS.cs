@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.IO;
 using System.Net;
 
@@ -8,8 +9,9 @@ namespace PostGreSqlTest
     public class SendSMS
     {
         private WebProxy objProxy1 = null;
+        private Logger logger = LogManager.GetCurrentClassLogger();
 
-        public string SendAlertSMS(string User, string password, string Mobile_Number, string Message)
+        public int SendAlertSMS(string User, string password, string Mobile_Number, string Message)
         {
             string stringpost = null;
             stringpost = "User=" + User + "&passwd=" + password + "&mobilenumber=" + Mobile_Number + "&message=" + Message;
@@ -53,11 +55,13 @@ namespace PostGreSqlTest
                 stringResult = objStreamReader.ReadToEnd();
 
                 objStreamReader.Close();
-                return stringResult;
+                logger.Info("SMS successfully sent! to " + Mobile_Number + " Response: " + stringResult);
+                return 1;
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                logger.Info("SMS Failed! to " + Mobile_Number + " Response: " + ex.Message);
+                return 0;
             }
             finally
             {

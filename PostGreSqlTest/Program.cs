@@ -14,6 +14,8 @@ namespace PostGreSqlTest
 {
     class Program
     {
+        public static readonly string USCode = "1";
+        public static readonly string INDCode = "91";
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private DataTable dt = new DataTable();
         static void Main(string[] args)
@@ -107,6 +109,7 @@ namespace PostGreSqlTest
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
+                        lstInsert.Add("dubeyankur@gmail.com");
                         if (Result == 1)
                         {
                             logger.Info("CustomerId inserted = " + CustId);
@@ -151,17 +154,18 @@ namespace PostGreSqlTest
                         {
                             logger.Info("Sending sms");
                             SendSMS sms = new SendSMS();
-                            string message = "Hi " + smsItems.Value + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/c7Zpbp Android App https://goo.gl/4NFV3t";  // "Hi "+smsItems.Value +" We are glad to have you onboard with wine hangouts!";
-                           // sms.SendAlertSMS(userid, password, "8162775179", message);
-                           // sms.SendAlertSMS(userid, password, "9966664262", message);
-                           // sms.SendAlertSMS(userid, password, "8978805050", message);
-                            logger.Info("SMS successfully sent!");
+                            string message = "Hi " + smsItems.Value + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/RdXfDo Android App https://goo.gl/ewTw4r";
+                            // "Hi "+smsItems.Value +" We are glad to have you onboard with wine hangouts!";
+                            //
+                            sms.SendAlertSMS(userid, password, USCode + smsItems.Key, message);
+                            // sms.SendAlertSMS(userid, password, "9966664262", message);
+                            // sms.SendAlertSMS(userid, password, "8978805050", message);
+                            
                         }
                         foreach (KeyValuePair<string, string> item in EmailDict)
                         {
                             SendEmail se = new SendEmail();
                             se.SendOneEmail(item.Key, item.Value).Wait();
-                            logger.Info("Mail Sent");
                         }                        
                     }
 
