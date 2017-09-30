@@ -9,6 +9,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using NLog;
+using System.Net.Http;
+using Newtonsoft.Json;
+
 
 namespace PostGreSqlTest
 {
@@ -20,8 +23,10 @@ namespace PostGreSqlTest
         private DataTable dt = new DataTable();
         static void Main(string[] args)
         {
+            
             try
             {
+                Program _programobj = new Program();
                 DateTime start = DateTime.Now;
                 List<string> lstInsert = new List<string>();
                 List<int> lstUpdate = new List<int>();
@@ -53,6 +58,7 @@ namespace PostGreSqlTest
 
                 //NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM Users.UsersTbl", conn);
                 string sql = "select * from customer  where last_modified >'" + lstModified + "'";
+                
                 //NpgsqlDataAdapter dr = cmd.ExecuteReader();
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
                 da.Fill(ds);
@@ -83,7 +89,7 @@ namespace PostGreSqlTest
                         string CustomerType = dr["custtype"].ToString();
                         DateTime CustomerAdded = DateTime.Now;
                         if (dr["custadded"] != DBNull.Value)
-                            CustomerAdded = Convert.ToDateTime(dr["custadded"],System.Globalization.CultureInfo.GetCultureInfo("hi-IN").DateTimeFormat);                            
+                            CustomerAdded = Convert.ToDateTime(dr["custadded"], System.Globalization.CultureInfo.GetCultureInfo("hi-IN").DateTimeFormat);
                         string CardNumber = dr["clubcard1"].ToString();
                         lastRow = Convert.ToDateTime(dr["last_modified"]);
                         string zip = dr["zip_code"].ToString();
@@ -105,11 +111,10 @@ namespace PostGreSqlTest
                         comand.Parameters.AddWithValue("@CustomerType", CustomerType);
                         comand.Parameters.AddWithValue("@CustomerAdded", CustomerAdded);
                         comand.Parameters.AddWithValue("@CardNumber", CardNumber);
-                        comand.Parameters.AddWithValue("@Zip",zip);
+                        comand.Parameters.AddWithValue("@Zip", zip);
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
-                        lstInsert.Add("dubeyankur@gmail.com");
                         if (Result == 1)
                         {
                             logger.Info("CustomerId inserted = " + CustId);
@@ -118,9 +123,9 @@ namespace PostGreSqlTest
                             if (firstname.Length > 13)
                             {
                                 trimmedFirstName = firstname.Substring(0, 13);
-                                if(email != null || email != "")
+                                if (email != null || email != "")
                                     EmailDict.Add(email, trimmedFirstName);
-                                if(Phone1 != null || Phone1 != "")
+                                if (Phone1 != null || Phone1 != "")
                                     SMSDict.Add(Phone1, trimmedFirstName);
                             }
                             else
@@ -133,7 +138,7 @@ namespace PostGreSqlTest
                         }
                         else
                         {
-                            logger.Info("CustomerId updated = "+CustId);
+                            logger.Info("CustomerId updated = " + CustId);
                             lstUpdate.Add(CustId);
                         }
                     }
@@ -150,27 +155,29 @@ namespace PostGreSqlTest
                     con.Close();
                     if (lstInsert.Count > 0)
                     {
-                        foreach(KeyValuePair<string,string> smsItems in SMSDict)
+                        foreach (KeyValuePair<string, string> smsItems in SMSDict)
                         {
                             logger.Info("Sending sms");
                             SendSMS sms = new SendSMS();
                             string message = "Hi " + smsItems.Value + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/RdXfDo Android App https://goo.gl/ewTw4r";
-                            // "Hi "+smsItems.Value +" We are glad to have you onboard with wine hangouts!";
-                            //
-                            sms.SendAlertSMS(userid, password, USCode + smsItems.Key, message);
-                            // sms.SendAlertSMS(userid, password, "9966664262", message);
-                            // sms.SendAlertSMS(userid, password, "8978805050", message);
-                            
+                            if (smsItems.Key == "" || smsItems.Key == string.Empty)
+                            {
+                                logger.Info("Mobile Number not present for "+smsItems.Value);
+                            }
+                            else
+                            {
+                                sms.SendAlertSMS(userid, password, USCode + smsItems.Key, message);
+                            }
                         }
                         foreach (KeyValuePair<string, string> item in EmailDict)
                         {
                             SendEmail se = new SendEmail();
-                            se.SendOneEmail(item.Key, item.Value).Wait();
-                        }                        
+                            //se.SendOneEmail(item.Key, item.Value).Wait();
+                            int x = se.UpdateMail(item.Key, item.Value).Result;
+                        }
                     }
 
                 }
-                //var result = se.SendOneEmail("soumik.12paul@gmail.com");
                 DateTime end = DateTime.Now;
                 TimeSpan duration = end - start;
                 logger.Info("Time taken to execute = "+duration);

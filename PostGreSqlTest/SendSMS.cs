@@ -55,7 +55,7 @@ namespace PostGreSqlTest
                 stringResult = objStreamReader.ReadToEnd();
 
                 objStreamReader.Close();
-                logger.Info("SMS successfully sent! to " + Mobile_Number + " Response: " + stringResult);
+                logger.Info("SMS successfully sent! to " + Mobile_Number + " Response: " + stringResult + " Input: " + stringpost);
                 return 1;
             }
             catch (Exception ex)
