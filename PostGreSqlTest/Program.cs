@@ -100,6 +100,18 @@ namespace PostGreSqlTest
                         string zip = dr["zip_code"].ToString();
                         if (zip.Length >= 5)
                             zip = zip.Substring(0, 5);
+                        string ExpireDate = dr["notes1"].ToString();
+                        if (ExpireDate == null || ExpireDate == "")
+                        {
+                            ExpireDate = DateTime.Now.AddYears(1).ToString();
+                            logger.Info("expiredate Modified = " + ExpireDate);
+                        }
+                        else
+                        {
+                            ExpireDate.Contains("Enomatic expiration:");
+                             ExpireDate = ExpireDate.Replace("Enomatic expiration", "");
+                            logger.Info("expiredate replace = " + ExpireDate);
+                        }
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
                         comand.CommandType = CommandType.StoredProcedure;
@@ -117,6 +129,7 @@ namespace PostGreSqlTest
                         comand.Parameters.AddWithValue("@CustomerAdded", CustomerAdded);
                         comand.Parameters.AddWithValue("@CardNumber", cust.CardNumber);
                         comand.Parameters.AddWithValue("@Zip", zip);
+                        comand.Parameters.AddWithValue("@ExpireDate",ExpireDate );
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
