@@ -63,7 +63,6 @@ namespace PostGreSqlTest
             {
                 if (email != "" || email != string.Empty)
                 {
-                    //https://hangoutz.azurewebsites.net/api/Item/SendEmail/kurellasumanth@gmail.com/user/sumanth
                     string ServiceURL = "https://hangoutz.azurewebsites.net/api/Item/";
                     var uri = new Uri(ServiceURL + "SendEmail/" + email + "/user/" + userid);
                     // var content = JsonConvert.SerializeObject(email);
@@ -73,6 +72,29 @@ namespace PostGreSqlTest
                 }
                 else
                     logger.Info("Email is blank for Name :"+userid);
+            }
+            catch (Exception ex)
+            {
+                logger.Info("Mail not sent" + email + " Error:" + ex.Message);
+            }
+
+            return 1;
+        }
+        public async Task<int> UpdateVIPMail(string email, string userid)
+        {
+            HttpClient client = new HttpClient();
+
+            try
+            {
+                if (email != "" || email != string.Empty)
+                {
+                    string ServiceURL = "https://hangoutz.azurewebsites.net/api/Item/";
+                    var uri = new Uri(ServiceURL + "SendVIPEmail/" + email + "/user/" + userid);
+                    var response = await client.GetStringAsync(uri).ConfigureAwait(false);
+                    logger.Info("Mail Sent" + email);
+                }
+                else
+                    logger.Info("Email is blank for Name :" + userid);
             }
             catch (Exception ex)
             {

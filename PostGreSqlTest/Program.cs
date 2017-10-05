@@ -28,8 +28,9 @@ namespace PostGreSqlTest
             {
                 Program _programobj = new Program();
                 DateTime start = DateTime.Now;
-                List<string> lstInsert = new List<string>();
-                List<int> lstUpdate = new List<int>();
+                List<Customer> lstInsert = new List<Customer>();
+                List<Customer> lstUpdate = new List<Customer>();
+                Customer cust = null;
                 Dictionary<string, string> EmailDict = new Dictionary<string, string>();
                 Dictionary<string, string> SMSDict = new Dictionary<string, string>();
                 string userid = ConfigurationManager.AppSettings["SMSLogin"];
@@ -57,8 +58,8 @@ namespace PostGreSqlTest
                 // Define a query
 
                 //NpgsqlCommand cmd = new NpgsqlCommand("SELECT * FROM Users.UsersTbl", conn);
-                string sql = "select * from customer  where last_modified >'" + lstModified + "'";
-                
+                string sql = "select * from customer  where last_modified > '" + lstModified + "'";
+
                 //NpgsqlDataAdapter dr = cmd.ExecuteReader();
                 NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
                 da.Fill(ds);
@@ -67,84 +68,78 @@ namespace PostGreSqlTest
                 if (ds.Tables[0].Rows.Count != 0)
                 {
                     DateTime lastRow = DateTime.Now;
+                    string LastModifiedString = string.Empty;
                     //string statement = "insert into ICSCustomers select ";
                     logger.Info("Inserting Data to Hangouts customer table");
                     for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                     {
+                        cust = new Customer();
                         DataRow dr = ds.Tables[0].Rows[i];
-                        int CustId = Convert.ToInt32(dr["customer_number"]);
-                        string firstname = dr["first_name"].ToString();
-                        string lastName = dr["last_name"].ToString();
+                        cust.Customerid = Convert.ToInt32(dr["customer_number"]);
+                        cust.FirstName = dr["first_name"].ToString();
+                        cust.LastName = dr["last_name"].ToString();
                         string Phone1 = "";
                         string Phone2 = "";
                         if (dr["phone1"] != DBNull.Value)
                             Phone1 = dr["phone1"].ToString();//Phone1 = Convert.ToInt64(dr["phone1"]);
                         if (dr["phone2"] != DBNull.Value)
                             Phone2 = dr["phone2"].ToString();//Phone2 = Convert.ToInt64(dr["phone2"]);
-                        string email = dr["email_address"].ToString();
-                        string address1 = dr["address1"].ToString();
-                        string address2 = dr["address2"].ToString();
-                        string city = dr["city"].ToString();
-                        string state = dr["state"].ToString();
-                        string CustomerType = dr["custtype"].ToString();
+                        cust.PhoneNumber = Phone1;
+                        cust.EmailId = dr["email_address"].ToString();
+                        cust.Address1 = dr["address1"].ToString();
+                        cust.Address2 = dr["address2"].ToString();
+                        cust.City = dr["city"].ToString();
+                        cust.State = dr["state"].ToString();
+                        cust.CustomerType = dr["custtype"].ToString();
                         DateTime CustomerAdded = DateTime.Now;
                         if (dr["custadded"] != DBNull.Value)
                             CustomerAdded = Convert.ToDateTime(dr["custadded"], System.Globalization.CultureInfo.GetCultureInfo("hi-IN").DateTimeFormat);
-                        string CardNumber = dr["clubcard1"].ToString();
+                        cust.CardNumber = dr["clubcard1"].ToString();
                         lastRow = Convert.ToDateTime(dr["last_modified"]);
+                        LastModifiedString = dr["last_modified"].ToString();
                         string zip = dr["zip_code"].ToString();
                         if (zip.Length >= 5)
                             zip = zip.Substring(0, 5);
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
                         comand.CommandType = CommandType.StoredProcedure;
-                        comand.Parameters.AddWithValue("@CustId", CustId);
-                        comand.Parameters.AddWithValue("@firstName", firstname);
-                        comand.Parameters.AddWithValue("@lastName", lastName);
+                        comand.Parameters.AddWithValue("@CustId", cust.Customerid);
+                        comand.Parameters.AddWithValue("@firstName", cust.FirstName);
+                        comand.Parameters.AddWithValue("@lastName", cust.LastName);
                         comand.Parameters.AddWithValue("@Phone1", Phone1);
                         comand.Parameters.AddWithValue("@Phone2", Phone2);
-                        comand.Parameters.AddWithValue("@email", email);
-                        comand.Parameters.AddWithValue("@address1", address1);
-                        comand.Parameters.AddWithValue("@address2", address2);
-                        comand.Parameters.AddWithValue("@city", city);
-                        comand.Parameters.AddWithValue("@state", state);
-                        comand.Parameters.AddWithValue("@CustomerType", CustomerType);
+                        comand.Parameters.AddWithValue("@email", cust.EmailId);
+                        comand.Parameters.AddWithValue("@address1", cust.Address1);
+                        comand.Parameters.AddWithValue("@address2", cust.Address2);
+                        comand.Parameters.AddWithValue("@city", cust.City);
+                        comand.Parameters.AddWithValue("@state", cust.State);
+                        comand.Parameters.AddWithValue("@CustomerType", cust.CustomerType);
                         comand.Parameters.AddWithValue("@CustomerAdded", CustomerAdded);
-                        comand.Parameters.AddWithValue("@CardNumber", CardNumber);
+                        comand.Parameters.AddWithValue("@CardNumber", cust.CardNumber);
                         comand.Parameters.AddWithValue("@Zip", zip);
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
                         if (Result == 1)
                         {
-                            logger.Info("CustomerId inserted = " + CustId);
-                            lstInsert.Add(email);
-                            string trimmedFirstName = "";
-                            if (firstname.Length > 13)
+                            logger.Info("CustomerId inserted = " + cust.Customerid);
+                            
+                            //string trimmedFirstName = "";
+                            if (cust.FirstName.Length > 13)
                             {
-                                trimmedFirstName = firstname.Substring(0, 13);
-                                if (email != null || email != "")
-                                    EmailDict.Add(email, trimmedFirstName);
-                                if (Phone1 != null || Phone1 != "")
-                                    SMSDict.Add(Phone1, trimmedFirstName);
+                                cust.FirstName = cust.FirstName.Substring(0, 13);
                             }
-                            else
-                            {
-                                if (email != null || email != "")
-                                    EmailDict.Add(email, firstname);
-                                if (Phone1 != null || Phone1 != "")
-                                    SMSDict.Add(Phone1, firstname);
-                            }
+                            lstInsert.Add(cust);
                         }
                         else
                         {
-                            logger.Info("CustomerId updated = " + CustId);
-                            lstUpdate.Add(CustId);
+                            logger.Info("CustomerId updated = " + cust.Customerid);
+                            lstUpdate.Add(cust);
                         }
                     }
 
                     logger.Info("Data inserted successfully.");
-                    string updateQuery = "Update CustomerTrack set LastModifiedDate='" + lastRow + "'";
+                    string updateQuery = "Update CustomerTrack set LastModifiedDate='" + lastRow + "',LastModifiedString ='"+LastModifiedString +"'";
                     logger.Info(updateQuery);
                     updateQuery += "where storeid = " + StoreId;
                     comand = new SqlCommand(updateQuery, con);
@@ -155,25 +150,40 @@ namespace PostGreSqlTest
                     con.Close();
                     if (lstInsert.Count > 0)
                     {
-                        foreach (KeyValuePair<string, string> smsItems in SMSDict)
+                        foreach (Customer cu in lstInsert)
                         {
                             logger.Info("Sending sms");
+                            string message = string.Empty;
                             SendSMS sms = new SendSMS();
-                            string message = "Hi " + smsItems.Value + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/RdXfDo Android App https://goo.gl/ewTw4r";
-                            if (smsItems.Key == "" || smsItems.Key == string.Empty)
+                            if (cu.CardNumber != "" || cu.CardNumber != string.Empty)
                             {
-                                logger.Info("Mobile Number not present for "+smsItems.Value);
+                                message = "THANK YOU for becoming a V.I.P.CLUB CARD member at Wineoutlet.Plz try our IOS App https://goo.gl/RdXfDo or Android https://goo.gl/ewTw4r";
                             }
                             else
                             {
-                                sms.SendAlertSMS(userid, password, USCode + smsItems.Key, message);
+                                message = "Hi " + cu.FirstName + ", We're glad to have you onboard with WineOutlet!Plz try our iOS App https://goo.gl/RdXfDo Android App https://goo.gl/ewTw4r";
                             }
-                        }
-                        foreach (KeyValuePair<string, string> item in EmailDict)
-                        {
-                            SendEmail se = new SendEmail();
-                            //se.SendOneEmail(item.Key, item.Value).Wait();
-                            int x = se.UpdateMail(item.Key, item.Value).Result;
+                            if (cu.PhoneNumber == "" || cu.PhoneNumber == string.Empty)
+                            {
+                                logger.Info("Mobile Number not present for "+cu.Customerid);
+                            }
+                            else
+                            {
+                                 sms.SendAlertSMS(userid, password, USCode + cu.PhoneNumber, message);
+                            }
+
+                            if (cu.EmailId != string.Empty|| cu.EmailId != "")
+                            {
+                                SendEmail se = new SendEmail();
+                                if (cu.CardNumber != "" || cu.CardNumber != string.Empty)
+                                {
+                                    int x = se.UpdateVIPMail(cu.EmailId, cu.FirstName).Result;
+                                }
+                                else
+                                {
+                                    int x = se.UpdateMail(cu.EmailId, cu.FirstName).Result;
+                                }
+                            }
                         }
                     }
 
