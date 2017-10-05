@@ -110,7 +110,7 @@ namespace PostGreSqlTest
                         {
                             ExpireDate.Contains("Enomatic expiration:");
                              ExpireDate = ExpireDate.Replace("Enomatic expiration", "");
-                            logger.Info("expiredate replace = " + ExpireDate);
+                            logger.Info("expiredate replace = " + ExpireDate );
                         }
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
