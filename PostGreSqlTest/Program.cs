@@ -101,14 +101,14 @@ namespace PostGreSqlTest
                         if (zip.Length >= 5)
                             zip = zip.Substring(0, 5);
                         string ExpireDate = dr["notes1"].ToString();
-                        if (ExpireDate == null || ExpireDate == "")
+                        if (ExpireDate.Contains("Enomatic expiration:"))
                         {
-                            ExpireDate = DateTime.Now.AddYears(1).ToString();  
+                            ExpireDate = ExpireDate.Replace("Enomatic expiration", ""); 
                         }
                         else
                         {
-                            ExpireDate.Contains("Enomatic expiration:");
-                             ExpireDate = ExpireDate.Replace("Enomatic expiration", "");
+
+                            ExpireDate = DateTime.Now.AddYears(1).ToString();
                         }
                         //statement += CustId + ",'" + firstname + "','" + lastName + "'," + Phone1 + "," + Phone2 + ",'" + email + "','" + address1 + "','" + address2 + "','" + city + "','" + state + "','" + CustomerType + "','" + CustomerAdded + "','" + CardNumber + "','',0,getdate()";
                         comand = new SqlCommand("InsertUpdateCustomers", con);
