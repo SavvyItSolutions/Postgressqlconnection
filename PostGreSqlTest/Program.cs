@@ -128,6 +128,7 @@ namespace PostGreSqlTest
                         comand.Parameters.AddWithValue("@CardNumber", cust.CardNumber);
                         comand.Parameters.AddWithValue("@Zip", zip);
                         comand.Parameters.AddWithValue("@ExpireDate",ExpireDate );
+                        comand.Parameters.AddWithValue("@StoreID",StoreId);
                         con.Open();
                         int Result = Convert.ToInt32(comand.ExecuteScalar());
                         con.Close();
